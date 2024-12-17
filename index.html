@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pemilahan Sampah</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mt-5"><i class="fas fa-check-circle"></i> Pemilahan Sampah</h1>
+        <div class="mt-4">
+            <div class="form-group">
+                <label for="jenisSampah">Pilih Jenis Sampah:</label>
+                <select id="jenisSampah" class="form-control" onchange="tampilkanTransisi()">
+                    <option value="null">-- Pilih Jenis Sampah --</option>
+                    <option value="organik">Organik</option>
+                    <option value="anorganik">Anorganik</option>
+                    <option value="berbahaya">Berbahaya</option>
+                </select>
+            </div>
+
+            <div id="hasil" class="mt-4"></div>
+
+            <div class="row mt-3">
+                <!-- Bagian Gambar -->
+                <div class="col-md-6 text-center">
+                    <img src="img.png" alt="transisi FSA" class="img-fluid">
+                </div>
+
+                <!-- Bagian Keterangan -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6><i class="fas fa-arrow-right"></i> Proses Berlanjut</h6>
+                            <div class="alert alert-success" id="transisiAlert">
+                                <p>Transisi yang menunjukkan bahwa proses akan berlanjut ditandai dengan warna hijau.</p>
+                                <ul id="transisiList"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="card mt-4">
+                        <div class="card-body">
+                            <h6><i class="fas fa-exchange-alt"></i> Keterangan Transisi Antar Keadaan dalam FSA</h6>
+                            <ul>
+                                <li>q0 (Awal): Titik awal di mana sampah dihasilkan.</li>
+                                <li>q1 (Pemilahan): Sampah yang sudah dikumpulkan dipilah berdasarkan jenisnya.</li>
+                                <li>q2 (Organik): Sampah yang dipilah sebagai organik dimasukkan ke tempat sampah organik.</li>
+                                <li>q3 (Anorganik): Sampah yang dipilah sebagai anorganik dimasukkan ke tempat sampah anorganik.</li>
+                                <li>q4 (Berbahaya): Sampah yang dipilah sebagai berbahaya dimasukkan ke tempat sampah B3 atau berbahaya.</li>
+                                <li>q5 (Penyimpanan): Sampah yang sudah dipilah menunggu dijemput ke TPS.</li>
+                                <li>q6 (Kompos): Sampah organik diolah menjadi pupuk kompos.</li>
+                                <li>q7 (Barang Daur Ulang): Mendaur ulang sampah anorganik menjadi barang baru yang dapat digunakan kembali.</li>
+                                <li>q8 (Hasil Penjualan): Sampah yang sudah dipilah dapat dijual ke bank sampah atau tempat lain.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function tampilkanTransisi() {
+            const jenisSampah = document.getElementById("jenisSampah").value;
+            const hasilDiv = document.getElementById("hasil");
+            const transisiList = document.getElementById("transisiList");
+            transisiList.innerHTML = ""; // Kosongkan daftar transisi sebelumnya
+
+            // Sembunyikan hasil dan transisi jika jenis sampah adalah "null"
+            if (jenisSampah === "null") {
+                hasilDiv.innerHTML = ""; // Kosongkan hasil
+                document.getElementById("transisiAlert"). style.display = "none"; // Sembunyikan alert transisi
+                return; // Keluar dari fungsi
+            }
+
+            let transisi = "";
+
+            switch (jenisSampah) {
+                case 'organik':
+                    hasilDiv.innerHTML = `
+                        <div class='alert alert-success'>
+                            <h2><i class='fas fa-leaf'></i> Sampah Organik</h2>
+                            <p>Sampah yang dipilah sebagai organik dimasukkan ke tempat sampah organik.</p>
+                            <p>Selanjutnya, sampah organik diolah menjadi pupuk kompos.</p>
+                        </div>`;
+                    transisi = `
+                        <li><span class="text-success">q1 ke q2</span> Pemilahan ke Organik</li>
+                        <li><span class="text-success">q2 ke q6</span>: Proses pengolahan sampah organik menjadi pupuk kompos.</li>
+                        <li><span class="text-success">q6 ke q8</span> Penjualan Kompos</li>
+                        <li><span class="text-danger">Apabila Sampah tidak terproses akan dikirim ke TPS: </span><span class="text-warning">q2 ke q5</span></li>`;
+                    break;
+
+                case 'anorganik':
+                    hasilDiv.innerHTML = `
+                        <div class='alert alert-info'>
+                            <h2><i class='fas fa-recycle'></i> Sampah Anorganik</h2>
+                            <p>Sampah yang dipilah sebagai anorganik dimasukkan ke tempat sampah anorganik.</p>
+                            <p>Selanjutnya, sampah anorganik dapat dijual ke bank sampah atau didaur ulang menjadi barang baru.</p>
+                        </div>`;
+                    transisi = `
+                        <li><span class="text-success">q1 ke q3</span> (Pemilahan ke Anorganik)</li>
+                        <li><span class="text-success">q3 ke q7</span> (Anorganik ke Barang Daur Ulang)</li>
+                        <li><span class="text-success">q4 atau q7 ke q8</span> Sampah yang sudah dipilah dapat dijual ke bank sampah atau tempat lain.</li>
+                        <li><span class="text-danger">Apabila Sampah tidak terproses akan dikirim ke TPS: </span><span class="text-warning">q4 ke q5</span></li>`;
+                    break;
+
+                case 'berbahaya':
+                    hasilDiv.innerHTML = `
+                        <div class='alert alert-warning'>
+                            <h2><i class='fas fa-exclamation-triangle'></i> Sampah Berbahaya</h2>
+                            <p>Sampah yang dipilah sebagai berbahaya dimasukkan ke tempat sampah B3 atau berbahaya.</p>
+                        </div>`;
+                    transisi = `<li><span class="text-success">q1 ke q4</span> (Pemilahan ke Berbahaya)</li>`;
+                    break;
+
+                default:
+                    hasilDiv.innerHTML = "<div class='alert alert-danger'>Jenis sampah tidak dikenali.</div>";
+            }
+
+            transisiList.innerHTML = transisi;
+            document.getElementById("transisiAlert").style.display = "block"; // Tampilkan alert transisi
+        }
+    </script>
+</body>
+</html>
